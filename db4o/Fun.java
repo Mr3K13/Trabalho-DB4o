@@ -1,5 +1,5 @@
 package projeto.db4o;
-import javax.swing.JOptionPane;
+
 public class Fun {
     //Banco de dados
 
@@ -20,18 +20,4 @@ public class Fun {
     public String getTelefone(){return Telefone;}
     public String getEndereco(){return Endereco;}
 
-    
-    
-    public void Atualizar(){
-        JOptionPane.showMessageDialog(null, "ok");
-            
-    }
-    public void Deletar(){
-        JOptionPane.showMessageDialog(null, "ok");
-            
-    }
-    public void Buscar(){
-        JOptionPane.showMessageDialog(null, "ok");
-            
-    }
 }
