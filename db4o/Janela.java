@@ -3,6 +3,7 @@ import com.db4o.Db4o;
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
 import com.db4o.ObjectSet;
+import com.db4o.query.Predicate;
 import java.awt.event.ActionEvent;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -135,7 +136,10 @@ public class Janela extends JFrame {
     
      // Verificador de valor de estado de variavel
     if (Nome.isEmpty() || Telefone.isEmpty() || Endereco.isEmpty()) {
-        JOptionPane.showMessageDialog(null, "Por favor, preencha todos os campos obrigatórios", "Aviso", 2);
+        JOptionPane.showMessageDialog(null, "Por favor, preencha todos os campos obrigatórios!", "Aviso", 2);
+    }
+        else if(!isNumberic(Telefone)){
+         JOptionPane.showMessageDialog(null, "Por favor, insira somente números no campo Telefone!", "Aviso", 2);
     }
     
     else{
@@ -179,12 +183,17 @@ public class Janela extends JFrame {
         try {
             // Abra o banco de dados
             db = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), "Banco.dbo");
+            
+           // Convertendo o nome para minúsculas
+            String nomeLowerCase = nomeParaAtualizar.toLowerCase();
 
-            fun.setNome(nomeParaAtualizar);
-
-            // Consulte o banco de dados
-            ObjectSet<Fun> resultados = db.queryByExample(fun);
-
+            // Consulta no banco de dados para encontrar o objeto com o mesmo nome (em minúsculas)
+            ObjectSet<Fun> resultados = db.query(new Predicate<Fun>() {
+                @Override
+                public boolean match(Fun obj) {
+                    return obj.getNome().toLowerCase().equals(nomeLowerCase);
+                }
+            });
             if (resultados.hasNext()) {
          
                 Fun objetoParaAtualizar = resultados.next();
@@ -238,10 +247,16 @@ public class Janela extends JFrame {
             // Abra o banco de dados
             db = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), "Banco.dbo");
 
-            fun.setNome(nomeParaDeletar);
+            // Convertendo o nome para minúsculas
+            String nomeLowerCase = nomeParaDeletar.toLowerCase();
 
-            // Consulta no banco de dados para encontrar o objeto com o mesmo nome
-            ObjectSet<Fun> resultados = db.queryByExample(fun);
+            // Consulta no banco de dados para encontrar o objeto com o mesmo nome (em minúsculas)
+            ObjectSet<Fun> resultados = db.query(new Predicate<Fun>() {
+                @Override
+                public boolean match(Fun obj) {
+                    return obj.getNome().toLowerCase().equals(nomeLowerCase);
+                }
+            });
 
             if (resultados.hasNext()) {
                 Fun objParaDeletar = resultados.next();
@@ -290,10 +305,17 @@ public class Janela extends JFrame {
             // Abra o banco de dados
             db = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), "Banco.dbo");
 
-            fun.setNome(nomeParaBuscar);
+            // Convertendo o nome para minúsculas
+            String nomeLowerCase = nomeParaBuscar.toLowerCase();
 
-            // Consulte o banco de dados para encontrar o objeto com o mesmo nome
-            ObjectSet<Fun> resultados = db.queryByExample(fun);
+            // Consulte o banco de dados para encontrar o objeto
+            ObjectSet<Fun> resultados = db.query (new Predicate<Fun>() {
+                
+                @Override
+                public boolean match(Fun obj) {
+                    return obj.getNome().toLowerCase().equals(nomeLowerCase);
+                }
+            });
 
             if (resultados.hasNext()) {
                 // Se encontrado, exiba os dados do registro
@@ -303,7 +325,7 @@ public class Janela extends JFrame {
                         "Telefone: " + objetoEncontrado.getTelefone() + "\n" +
                         "Endereço: " + objetoEncontrado.getEndereco(), "Resultado da Busca", 1);
             } else {
-                JOptionPane.showMessageDialog(null,"Registro não encontrado\n\n   Coloque um NOME valido", "Aviso", 2);
+                JOptionPane.showMessageDialog(null, "Registro não encontrado", "Aviso", 2);
             }
         } finally {
             // Certifique-se de fechar o banco de dados, mesmo em caso de exceção
@@ -312,10 +334,10 @@ public class Janela extends JFrame {
             }
         }
     } else {
-        JOptionPane.showMessageDialog(null,"Dados Não inseridos\n\n   Coloque um NOME valido", "Aviso", 2);
+        JOptionPane.showMessageDialog(null, "Nome inválido", "Aviso", 2);
     }
 }
-
+   
    // Função para atualizar a tabela
    private void atualizarTabela() {
         // Limpa a tabela antes de atualizar
@@ -332,5 +354,16 @@ public class Janela extends JFrame {
         }
 
         db.close();
+    }
+   
+   // Função para a caixa de telefone aceitar só numero
+   private boolean isNumberic(String str) {
+         if (str == null) return false; // handle null-pointer
+        if (str.length() == 0) return false; // handle empty strings
+        // to make sure that the input is numeric, we have to go through the characters
+        for (char c : str.toCharArray()) {
+            if (!Character.isDigit(c)) return false; // we found a non-digit character so we can early return
+        }
+        return true;
     }
 }
